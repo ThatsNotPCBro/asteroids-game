@@ -8,6 +8,7 @@ from logger import log_state
 import pygame
 from player import Player
 from shot import Shot
+import shot
 
 def main():
     pygame.init()
@@ -44,6 +45,13 @@ def main():
                 log_event("player_hit")
                 print("Game over!")
                 sys.exit()
+
+            for shot in shots:
+                if shot.collides_with(asteroid):
+                    log_event("asteroid_shot")
+                    asteroid.kill()
+                    shot.kill()
+                    break
 
         screen.fill("black")
         for sprite in drawable:

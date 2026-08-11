@@ -11,3 +11,6 @@ class Shot(CircleShape):
 
     def update(self, dt: float) -> None:
         self.position += self.velocity * dt
+
+    def collides_with(self, other: "Shot") -> bool:
+            return bool(self.position.distance_to(other.position) < self.radius + other.radius)
