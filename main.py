@@ -3,7 +3,14 @@ import sys
 import pygame
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
-from constants import ASTEROID_SCORE, SCREEN_HEIGHT, SCREEN_WIDTH
+from constants import (
+    ASTEROID_MIN_RADIUS,
+    LARGE_ASTEROID_SCORE,
+    MEDIUM_ASTEROID_SCORE,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    SMALL_ASTEROID_SCORE,
+)
 from logger import log_event, log_state
 from player import Player
 from shot import Shot
@@ -50,7 +57,12 @@ def main() -> None:
                 if asteroid.collides_with(shot):
                     log_event("asteroid_shot")
                     shot.kill()
-                    player.add_score(ASTEROID_SCORE)
+                    if asteroid.radius <= ASTEROID_MIN_RADIUS:
+                        player.add_score(SMALL_ASTEROID_SCORE)
+                    elif asteroid.radius <= ASTEROID_MIN_RADIUS * 2:
+                        player.add_score(MEDIUM_ASTEROID_SCORE)
+                    else:
+                        player.add_score(LARGE_ASTEROID_SCORE)
                     asteroid.split()
 
         screen.fill("black")
