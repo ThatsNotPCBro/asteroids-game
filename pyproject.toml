@@ -1,7 +1,7 @@
 [project]
 name = "asteroids-game"
 version = "0.1.0"
-description = "Add your description here"
+description = "My first game: Asteroids"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

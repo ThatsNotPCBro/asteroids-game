@@ -1,8 +1,8 @@
-import pygame
 import random
 
+import pygame
 from circleshape import CircleShape
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS
+from constants import ASTEROID_MIN_RADIUS, LINE_WIDTH
 from logger import log_event
 
 
