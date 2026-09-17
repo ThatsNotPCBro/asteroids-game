@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
@@ -21,6 +19,7 @@ def main() -> None:
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     score_font = pygame.font.Font(None, 36)
+    game_over_font = pygame.font.Font(None, 72)
 
     updatable: pygame.sprite.Group = pygame.sprite.Group()
     drawable: pygame.sprite.Group = pygame.sprite.Group()
@@ -37,6 +36,7 @@ def main() -> None:
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
     dt = 0.0
+    game_over = False
 
     while True:
         log_state()
@@ -45,25 +45,26 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 return
 
-        updatable.update(dt)
+        if not game_over:
+            updatable.update(dt)
 
-        for asteroid in asteroids:
-            if asteroid.collides_with(player):
-                log_event("player_hit")
-                print("Game over!")
-                sys.exit()
+            for asteroid in asteroids:
+                if asteroid.collides_with(player):
+                    log_event("player_hit")
+                    game_over = True
+                    break
 
-            for shot in shots:
-                if asteroid.collides_with(shot):
-                    log_event("asteroid_shot")
-                    shot.kill()
-                    if asteroid.radius <= ASTEROID_MIN_RADIUS:
-                        player.add_score(SMALL_ASTEROID_SCORE)
-                    elif asteroid.radius <= ASTEROID_MIN_RADIUS * 2:
-                        player.add_score(MEDIUM_ASTEROID_SCORE)
-                    else:
-                        player.add_score(LARGE_ASTEROID_SCORE)
-                    asteroid.split()
+                for shot in shots:
+                    if asteroid.collides_with(shot):
+                        log_event("asteroid_shot")
+                        shot.kill()
+                        if asteroid.radius <= ASTEROID_MIN_RADIUS:
+                            player.add_score(SMALL_ASTEROID_SCORE)
+                        elif asteroid.radius <= ASTEROID_MIN_RADIUS * 2:
+                            player.add_score(MEDIUM_ASTEROID_SCORE)
+                        else:
+                            player.add_score(LARGE_ASTEROID_SCORE)
+                        asteroid.split()
 
         screen.fill("black")
 
@@ -72,6 +73,11 @@ def main() -> None:
 
         for obj in drawable:
             obj.draw(screen)
+
+        if game_over:
+            game_over_text = game_over_font.render("GAME OVER", True, "white")
+            game_over_rect = game_over_text.get_rect(center=screen.get_rect().center)
+            screen.blit(game_over_text, game_over_rect)
 
         pygame.display.flip()
 
