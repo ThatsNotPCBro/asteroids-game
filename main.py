@@ -19,7 +19,8 @@ def main() -> None:
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     score_font = pygame.font.Font(None, 36)
-    game_over_font = pygame.font.Font(None, 72)
+    title_font = pygame.font.Font(None, 72)
+    prompt_font = pygame.font.Font(None, 36)
 
     updatable: pygame.sprite.Group = pygame.sprite.Group()
     drawable: pygame.sprite.Group = pygame.sprite.Group()
@@ -29,14 +30,13 @@ def main() -> None:
     Asteroid.containers = (asteroids, updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
-    asteroid_field = AsteroidField()
-
     Player.containers = (updatable, drawable)
 
+    asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
     dt = 0.0
-    game_over = False
+    game_state = "start_menu"
 
     while True:
         log_state()
@@ -44,14 +44,21 @@ def main() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                if game_state in ("start_menu", "game_over"):
+                    for sprite in list(updatable):
+                        sprite.kill()
+                    asteroid_field = AsteroidField()
+                    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                    game_state = "playing"
 
-        if not game_over:
+        if game_state == "playing":
             updatable.update(dt)
 
             for asteroid in asteroids:
                 if asteroid.collides_with(player):
                     log_event("player_hit")
-                    game_over = True
+                    game_state = "game_over"
                     break
 
                 for shot in shots:
@@ -68,16 +75,31 @@ def main() -> None:
 
         screen.fill("black")
 
-        score_text = score_font.render(f"Score: {player.score}", True, "white")
-        screen.blit(score_text, (10, 10))
+        if game_state == "start_menu":
+            title_text = title_font.render("ASTEROIDS", True, "white")
+            prompt_text = prompt_font.render("Start Game? Press ENTER", True, "white")
+            screen.blit(title_text, title_text.get_rect(center=(SCREEN_WIDTH / 2, 280)))
+            screen.blit(
+                prompt_text, prompt_text.get_rect(center=(SCREEN_WIDTH / 2, 370))
+            )
+        else:
+            score_text = score_font.render(f"Score: {player.score}", True, "white")
+            screen.blit(score_text, (10, 10))
 
-        for obj in drawable:
-            obj.draw(screen)
+            for obj in drawable:
+                obj.draw(screen)
 
-        if game_over:
-            game_over_text = game_over_font.render("GAME OVER", True, "white")
-            game_over_rect = game_over_text.get_rect(center=screen.get_rect().center)
-            screen.blit(game_over_text, game_over_rect)
+            if game_state == "game_over":
+                game_over_text = title_font.render("GAME OVER", True, "white")
+                play_again_text = prompt_font.render("Play Again? Press ENTER", True, "white")
+                screen.blit(
+                    game_over_text,
+                    game_over_text.get_rect(center=(SCREEN_WIDTH / 2, 280)),
+                )
+                screen.blit(
+                    play_again_text,
+                    play_again_text.get_rect(center=(SCREEN_WIDTH / 2, 370)),
+                )
 
         pygame.display.flip()
 
